@@ -1,0 +1,57 @@
+---
+title: "Trefelle"
+publishedAt: "2026-10-04"
+summary: "A practice space for engineering judgment that runs AI and real code entirely in your browser. Your keys never leave your device."
+images:
+  - "/images/trefelle-cover.png"
+link: "https://trefelle.vercel.app"
+category: "Web · AI · 2026"
+tags:
+  - "JavaScript"
+  - "HTML/CSS"
+  - "Supabase"
+  - "Vercel"
+linkLabel: "Live site"
+---
+
+Trefelle pairs production-shaped scenarios with an AI mentor you configure yourself. A short profile works out where you are, recommends fields and roles worth practicing for, and drops you into a workspace of real tasks.
+
+Its defining choice is that the parts that usually need a backend do not have one. Model calls go from your browser straight to the provider, so no API key ever reaches Trefelle's server, and the practice tasks run in the browser too. It is built in plain JavaScript, HTML, and CSS, with Supabase for sign-in and saved progress, and it deploys on Vercel. Source: [github.com/ChamarWilliams/trefelle](https://github.com/ChamarWilliams/trefelle). Live: [trefelle.vercel.app](https://trefelle.vercel.app).
+
+## Try the whole flow
+
+Connect, fill a short profile, pick a recommended field, and solve a task. The recommendations here are simple rules, but the code runs for real, in your browser, with no server.
+
+<Demo src="/demos/trefelle-flow.html" title="Trefelle app flow demo" height={620} />
+
+## Bring your own AI, and keep the key
+
+The setup supports any OpenAI-compatible endpoint, Anthropic, local models through Ollama or LM Studio with automatic model discovery, and a small model running in the browser through WebLLM. Each of these is just an entry in one key stack, so the app treats them the same way and can move between them.
+
+People can stack several entries, and the app rotates to the next one when a call fails. My first version only rotated on a rate-limit error, so one misconfigured key, such as a wrong model name returning 404, blocked the whole stack even when the others worked. It now rotates on any non-abort failure and only shows the last error once every entry has been tried. I tested it by stubbing the network to fail the first key and confirming the second key's response came through. I also retry transient empty responses from local models up to twice before showing an error.
+
+Try it below. Break a key, send a profile, and switch the rule to see how the first version behaved.
+
+<Demo src="/demos/trefelle.html" title="Trefelle key rotation demo" height={560} />
+
+For the in-browser path I pinned one specific model, because it was the only model in WebLLM's prebuilt list that both reasons and fits a consumer GPU.
+
+## Running real code with no server
+
+The practice dashboard runs JavaScript in a Web Worker with a timeout, so an infinite loop cannot hang the tab, Python through Pyodide, and SQL against an in-memory SQLite database. Each task has real pass or fail test cases.
+
+Getting there took some dead ends. A hosted execution API I started with had closed to public access, and the next candidate required payment from the first request. I also tried compiling C and C++ to WebAssembly in the browser, but hit a stability problem I could not resolve, so I dropped it rather than ship something flaky.
+
+## Replacing my own assessment
+
+The first version ran a long adaptive conversation: personality questions, then field questions, with a static question chain as a fallback when no model was connected. It worked, but every question was another round trip with another chance to fail, and the conversational engine had grown to roughly 750 lines.
+
+I replaced it with one structured profile (experience level, languages and tools, past roles, education, field interest) sent to a single model call. There is now one wait instead of many, and the model can return as many genuinely fitting fields as it finds, up to six, instead of a hardcoded top three. With no model connected, the flow skips straight to a manual field picker. I deleted the old engine rather than keeping it as a fallback, because a fallback nobody exercises is just more code to break.
+
+## A sign-in bug that every attempt hit
+
+GitHub sign-in failed every time with "PKCE code verifier not found in storage." The auth client's default behavior is to consume the one-time code in the URL as soon as it loads, which raced my own explicit exchange call. Whichever ran first cleared the stored verifier and the other one failed. Turning off the automatic detection fixed it.
+
+## What lives where
+
+Non-secret progress, such as chosen fields, roles, and assessment results, saves to the user's account through Supabase. API keys stay in the browser on that device only. The page says so plainly, so nobody assumes their key is stored anywhere else.

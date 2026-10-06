@@ -1,0 +1,66 @@
+---
+title: "Aspirer's Workshop"
+publishedAt: "2026-10-03"
+summary: "A Roblox game with 3,000+ visits. I built the combat systems and the client-server networking behind them, including parry fairness across 0 to 400ms of ping."
+images:
+  - "/images/aspirers-cover.png"
+category: "Roblox · Netcode · 2024 - Present"
+tags:
+  - "Luau"
+  - "Git"
+---
+
+Aspirer's Workshop is a Roblox game with 3,000+ visits, built by a team of 7 to 8 developers. I built much of its combat and networking layer myself: abilities, hit detection, damage resolution, and the client-server flows that keep them consistent. This write-up covers the hardest part of that work, which is making sword combat feel fair when players are on different connections.
+
+## The problem
+
+In a duel, the player has to feel their input land instantly, but the server has to decide the result. At 200ms of ping those two views disagree. A defender sees the blade land and presses parry on time, yet the press reaches the server after the hit has already been processed. Without compensation, a correctly timed parry reads as late.
+
+## Deciding whose timeline to believe
+
+I split the problem in two.
+
+- **Hits favor the attacker.** The server rewinds the target to the tick the attacker actually saw, using the tick-indexed snapshots, then validates the hit against that state.
+- **Parries are judged on the defender's timeline.** The server shifts the parry window by the defender's one-way latency plus a 20ms baseline for input overhead, capped at 200ms. That centers the valid press range on the moment the blade visually lands, at every ping.
+
+To cover inputs still in flight, I added a retroactive parry. When a hit lands, the server records a pending refund. If a parry arrives whose backdated press time falls inside the window around that contact, the hit converts: health is refunded, the defender's stun is cleared, and the attacker is stunned as parried. Damage always applies instantly, and the undo only fires for presses that were genuinely in flight.
+
+The result is about 200ms of early tolerance and 66 to 165ms of late tolerance that scales with ping, anchored on the moment the blade lands.
+
+## Calibrating with deployed agents
+
+Tuning by feel does not work at 300ms, so I let automated agents collect the data. A calibration command deploys a dummy NPC that attacks and a simulated defender that parries through the real input path, not a server-side shortcut. It steps through Studio's simulated network lag, and at each ping it runs repeated attempts and records what happened.
+
+Each failure is classified instead of just counted. If the compensated press lands past the end of the window, the shift is lowered. If it lands before the start, the shift is raised. If no window was open at all, the cause is not compensation and the curve is left alone. The command nudges the curve in 20ms steps until it gets five successful parries at that ping, then reports requested ping, the round-trip time the combat system actually measured, the final curve shift, and the number of attempts and adjustments.
+
+That data exposed two flaws in my first version. It used a debug override that only checked the curve's own math and never touched the real network path. Then, stacking the override on top of simulated lag made the system compensate for 200ms when the real delay was closer to 400ms, so a correctly timed parry still read as mistimed. The fix was to add the two sources together instead of choosing one.
+
+## A bug: players stuck action-locked after a rollback
+
+I wired hard-desync correction into the full per-player rollback, which restores position, velocity, humanoid state, and gameplay state together. Soon after, players reported being able to walk but not act.
+
+The cause was in how locks end. Flags like Action and Locked are usually cleared by a real-time animation callback, not by an expiry tick. I counted 12 of 28 call sites with no end tick at all. If a restored snapshot captured a player mid-swing, the lock was reinstated, and the callback that would have cleared it had already fired. The fix clears locks with no end tick after a restore and leaves genuinely timed locks, such as a dash in progress, to expire normally.
+
+## Keeping the server cheap
+
+The snapshot system runs every tick for every player, so cost adds up quickly.
+
+- I shortened rollback retention from 5 seconds to 2 seconds, which cut per-player snapshot memory by more than half.
+- I removed a second pass over every player's state each tick by computing both results in a single loop.
+- NPC target acquisition scanned every player on every frame while an NPC had no target. A 0.5 second retry interval removed that without hurting responsiveness.
+
+## Try it
+
+These two demos are simplified models of the problems above.
+
+### Client prediction and server correction
+
+The raspberry dot reacts at once. The server holds a rule the client cannot see, and pulls the dot back when they disagree.
+
+<Demo src="/demos/prediction.html" title="Client prediction demo" height={480} />
+
+### Hit validation with rewind
+
+Aim at what you see, fire, and watch the server decide with and without rewind.
+
+<Demo src="/demos/hit-validation.html" title="Hit validation demo" height={500} />

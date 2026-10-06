@@ -1,0 +1,25 @@
+---
+title: "Arboryn"
+publishedAt: "2026-10-02"
+summary: "A local-first three-way merge engine for Roblox object trees. Currently in Phase 0, a Studio capture harness."
+images:
+  - "/images/arboryn-cover.png"
+link: "https://github.com/ChamarWilliams/arboryn"
+category: "Developer tools · In progress"
+tags:
+  - "Luau"
+  - "Rojo"
+linkLabel: "GitHub"
+---
+
+Arboryn is a local-first three-way merge engine for Roblox object trees, written in Luau with Rojo. The goal is to merge two people's changes to the same place safely.
+
+The repository is in Phase 0, which asks one question before the product proceeds: can a Studio plugin observe and round-trip enough of a real DataModel to support trustworthy semantic merging? The current code is a Luau capture and measurement harness with a reflection-derived property inventory, explicit capture gaps instead of silent omission, and a native .rbxm round-trip probe. No merge engine exists yet, and real Studio capture results have not been collected, so Phase 0 has not passed. The design document is public in the repository.
+
+Source: [github.com/ChamarWilliams/arboryn](https://github.com/ChamarWilliams/arboryn).
+
+## The problem it is meant to solve
+
+This is a concept demo of a three-way merge on a tiny object tree, not the engine itself.
+
+<Demo src="/demos/arboryn.html" title="Three-way merge concept demo" height={520} />

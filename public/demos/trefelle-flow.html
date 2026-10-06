@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" class="t-teal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trefelle app flow demo</title>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="demo">
+  <ol class="trail" id="fl-trail" aria-label="Progress">
+    <li data-s="1"><i>1</i>Connect</li>
+    <li data-s="2"><i>2</i>Profile</li>
+    <li data-s="3"><i>3</i>Fields</li>
+    <li data-s="4"><i>4</i>Practice</li>
+  </ol>
+
+  <section class="pane" id="p1">
+    <p class="help">First, connect the AI mentor. In the real app this is where you add a key, a local model, or an in-browser model.</p>
+    <div class="controls">
+      <button class="small primary" type="button" id="fl-connect">Connect my AI (simulated)</button>
+      <button class="small" type="button" id="fl-skip">No AI, I'll pick a field</button>
+    </div>
+  </section>
+
+  <section class="pane" id="p2" hidden>
+    <p class="help">One short profile becomes one model call. There is a single wait instead of a long back-and-forth.</p>
+    <fieldset class="engines">
+      <legend>Experience</legend>
+      <label class="check"><input type="radio" name="xp" value="start" checked> Just starting</label>
+      <label class="check"><input type="radio" name="xp" value="some"> Some projects</label>
+      <label class="check"><input type="radio" name="xp" value="work"> Working in tech</label>
+    </fieldset>
+    <fieldset class="engines">
+      <legend>What are you drawn to?</legend>
+      <label class="check"><input type="checkbox" name="int" value="websites" checked> Websites</label>
+      <label class="check"><input type="checkbox" name="int" value="data"> Data</label>
+      <label class="check"><input type="checkbox" name="int" value="ai"> AI</label>
+      <label class="check"><input type="checkbox" name="int" value="games"> Games</label>
+      <label class="check"><input type="checkbox" name="int" value="security"> Security</label>
+      <label class="check"><input type="checkbox" name="int" value="cloud"> Cloud</label>
+      <label class="check"><input type="checkbox" name="int" value="mobile"> Mobile</label>
+      <label class="check"><input type="checkbox" name="int" value="systems"> Systems</label>
+    </fieldset>
+    <fieldset class="engines">
+      <legend>What do you already know?</legend>
+      <label class="check"><input type="checkbox" name="lang" value="JavaScript" checked> JavaScript</label>
+      <label class="check"><input type="checkbox" name="lang" value="Python"> Python</label>
+      <label class="check"><input type="checkbox" name="lang" value="SQL"> SQL</label>
+      <label class="check"><input type="checkbox" name="lang" value="C/C++"> C or C++</label>
+    </fieldset>
+    <div class="controls"><button class="small primary" type="button" id="fl-go">Get recommendations</button></div>
+  </section>
+
+  <section class="pane" id="p3" hidden>
+    <p class="help" id="fl-fhelp"></p>
+    <div class="fields" id="fl-fields"></div>
+    <p class="note" id="fl-fnote"></p>
+  </section>
+
+  <section class="pane" id="p4" hidden>
+    <p class="help" id="fl-phelp"></p>
+    <p class="task"><strong>Task:</strong> write <code>slugify(title)</code>. Lowercase it, trim it, and join words with single hyphens. Drop punctuation and leave no hyphen at either end.</p>
+    <textarea id="fl-code" class="code" spellcheck="false" aria-label="Code editor"></textarea>
+    <div class="controls">
+      <button class="small primary" type="button" id="fl-run">Run tests</button>
+      <button class="small" type="button" id="fl-sol">Show a solution</button>
+      <button class="small" type="button" id="fl-reset">Start over</button>
+    </div>
+    <ol class="flow" id="fl-tests" aria-live="polite"></ol>
+    <p class="note" id="fl-pnote">This code runs in a Web Worker in your browser, with a timeout. No server is involved. The real app also runs Python and SQL this way.</p>
+  </section>
+</div>
+<script src="common.js"></script>
+<script src="trefelle-flow.js"></script>
+</body>
+</html>

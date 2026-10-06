@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" class="t-blue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Client prediction demo</title>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="demo">
+  <p class="help">Raise the ping, then hold the left and right arrow keys, or press the left or right half of the track. The raspberry dot reacts at once and the server corrects it. The grey dot waits on the server.</p>
+  <div class="controls">
+    <label class="range"><span>Ping</span><input id="pred-ping" type="range" min="0" max="400" step="10" value="240"><output id="pred-ping-out" for="pred-ping">240 ms</output></label>
+    <label class="check"><input id="pred-zone" type="checkbox" checked> Server-only slow zone</label>
+    <label class="check"><input id="pred-smooth" type="checkbox" checked> Smooth corrections</label>
+    <button id="pred-toggle" class="small" type="button">Pause</button>
+  </div>
+  <canvas id="pred" tabindex="0" role="img" aria-label="Three lanes: the server, a client that waits for the server, and a client that predicts and corrects."></canvas>
+  <p class="readout" id="pred-readout">Corrections so far: 0</p>
+  <p class="note">The slow zone exists only on the server, so the client predicts wrong inside it and is pulled back. The server stays in charge of the rules while the client still feels fast.</p>
+</div>
+<script src="common.js"></script>
+<script src="pred.js"></script>
+</body>
+</html>

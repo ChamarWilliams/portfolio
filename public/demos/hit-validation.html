@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" class="t-blue">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hit validation demo</title>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="demo">
+  <p class="help">The shooter sees the target as it was a moment ago. Move the pointer to aim and click to fire. With rewind off, the server checks where the target is now and you miss. With rewind on, it checks the snapshot from the tick you saw.</p>
+  <div class="controls">
+    <label class="range"><span>Ping</span><input id="hit-ping" type="range" min="0" max="400" step="10" value="240"><output id="hit-ping-out" for="hit-ping">240 ms</output></label>
+    <label class="check"><input id="hit-rewind" type="checkbox" checked> Rewind to the shooter's tick</label>
+    <button id="hit-fire" class="small" type="button">Fire</button>
+  </div>
+  <canvas id="hit" tabindex="0" role="img" aria-label="Two lanes: what the shooter sees and where the target is on the server. Click to fire."></canvas>
+  <p class="readout" id="hit-readout">Shots: 0 | Hits: 0</p>
+  <p class="note" id="hit-last">Click the top lane to fire.</p>
+</div>
+<script src="common.js"></script>
+<script src="hit.js"></script>
+</body>
+</html>

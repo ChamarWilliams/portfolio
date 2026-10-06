@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" class="t-teal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trefelle key rotation demo</title>
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="demo">
+  <p class="help">Keys stay in your browser and calls go straight to the provider. Stack more than one key, break one, and send your profile to see which key answers.</p>
+  <div class="keys" id="tf-keys">
+    <div class="keyrow" data-i="0">
+      <span class="n">1</span>
+      <span class="name">OpenAI-compatible key<span>gpt-style endpoint</span></span>
+      <select aria-label="State of key 1">
+        <option value="ok">Works</option>
+        <option value="rate">Rate limited (429)</option>
+        <option value="model" selected>Wrong model name (404)</option>
+        <option value="down">Endpoint down</option>
+      </select>
+    </div>
+    <div class="keyrow" data-i="1">
+      <span class="n">2</span>
+      <span class="name">Anthropic key<span>Messages API</span></span>
+      <select aria-label="State of key 2">
+        <option value="ok" selected>Works</option>
+        <option value="rate">Rate limited (429)</option>
+        <option value="model">Wrong model name (404)</option>
+        <option value="down">Endpoint down</option>
+      </select>
+    </div>
+    <div class="keyrow" data-i="2">
+      <span class="n">3</span>
+      <span class="name">Local model<span>Ollama or LM Studio</span></span>
+      <select aria-label="State of key 3">
+        <option value="ok" selected>Works</option>
+        <option value="rate">Rate limited (429)</option>
+        <option value="model">Wrong model name (404)</option>
+        <option value="down">Endpoint down</option>
+      </select>
+    </div>
+  </div>
+  <fieldset class="engines">
+    <legend>Rotation rule</legend>
+    <label class="check"><input type="radio" name="rule" value="any" checked> Rotate on any failure</label>
+    <label class="check"><input type="radio" name="rule" value="rate"> Rotate only on rate limits</label>
+  </fieldset>
+  <div class="controls">
+    <button id="tf-run" class="small primary" type="button">Send profile</button>
+  </div>
+  <ol class="flow" id="tf-flow" aria-live="polite"></ol>
+  <p class="note" id="tf-result">Pick a rule and press Send profile.</p>
+</div>
+<script src="common.js"></script>
+<script src="trefelle.js"></script>
+</body>
+</html>

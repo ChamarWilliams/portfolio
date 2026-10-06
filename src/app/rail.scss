@@ -1,0 +1,10 @@
+.has-rail {
+    padding-left: 5rem !important;
+}
+
+@media (max-width: 768px) {
+    .has-rail {
+        padding-left: var(--static-space-24) !important;
+        padding-bottom: 5rem !important;
+    }
+}

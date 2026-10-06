@@ -1,0 +1,23 @@
+---
+title: "VLM Image-Pair Judge"
+publishedAt: "2026-10-01"
+summary: "A Python tool that uses vision-language models to judge pairs of AI-generated images against a written rubric."
+images:
+  - "/images/judge-cover.png"
+category: "AI evaluation"
+tags:
+  - "Python"
+  - "OpenRouter"
+  - "Gemini"
+  - "OpenAI"
+---
+
+This tool uses vision-language models, through OpenRouter, Gemini, and OpenAI, to automatically judge pairs of AI-generated images. The judgment is driven by a written rubric, so the quality of the rubric decides the quality of the result.
+
+I improved the rubric by testing it against live, real examples, and widened it to cover anatomy, water and reflections, document text, chart inspection, and tonal intent.
+
+## Why the weights matter
+
+The same two images can produce a different winner depending on what the rubric cares about. These scores are sample numbers for illustration.
+
+<Demo src="/demos/judge.html" title="Rubric weights demo" height={560} />
