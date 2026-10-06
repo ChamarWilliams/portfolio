@@ -13,15 +13,20 @@ html.e-nav{scroll-behavior:auto!important}
 html.e-nav .e-constel .sat{animation-play-state:paused}
 .e-page{animation:e-in .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes e-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.e-page{animation:none}.e-reveal{opacity:1!important;transform:none!important}}
+@media (prefers-reduced-motion:reduce){.e-marker{transition:none}.e-trail.moving::before{animation:none}.e-page{animation:none}.e-reveal{opacity:1!important;transform:none!important}}
 
 /* section trail */
 .e-trail{position:fixed;left:40px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:44px;z-index:5}
-.e-trail::before{content:'';position:absolute;left:8px;top:8px;bottom:8px;border-left:2px dotted var(--e-ink)}
+.e-trail::before{content:'';position:absolute;left:7px;top:9px;bottom:9px;width:4px;background:radial-gradient(circle at 2px 2px,var(--e-ink) 1.2px,transparent 1.6px) 0 0/4px 8px repeat-y}
+.e-trail.moving::before{animation:e-flow .45s linear infinite}
+.e-trail.moving.up::before{animation-direction:reverse}
+@keyframes e-flow{to{background-position:0 8px}}
+.e-marker{position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--e-gold);box-shadow:0 0 0 5px rgba(184,137,58,.18);pointer-events:none;z-index:2;will-change:transform;transition:transform .14s ease-out}
+.e-trail.moving .e-marker{box-shadow:0 0 0 8px rgba(184,137,58,.14)}
 .e-body .e-trail a{position:relative;display:flex;align-items:center;gap:14px;font:500 13px var(--e-sans);letter-spacing:.06em;color:var(--e-dim);transition:color .2s}
 .e-trail i{width:18px;height:18px;border-radius:50%;background:#fff;border:1.5px solid var(--e-ink);transition:.25s;flex:none}
 .e-body .e-trail a:hover,.e-body .e-trail a.on{color:var(--e-ink)}
-.e-trail a.on i{background:var(--e-gold);border-color:var(--e-gold);box-shadow:0 0 0 5px rgba(184,137,58,.18)}
+.e-trail a.pass i{border-color:var(--e-gold)}
 
 .e-main{max-width:940px;margin:0 auto;padding:0 24px 40px;position:relative}
 @media (min-width:981px){.e-main{margin-left:max(200px,calc((100vw - 940px)/2 + 60px));margin-right:24px}}

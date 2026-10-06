@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Art } from "@/components/Art";
 
@@ -54,24 +54,67 @@ const SKILLS = [
     { title: "Engineering", items: ["Git/GitHub", "Docker", "Linux", "Node.js", "Supabase", "Vercel", "REST APIs", "Client-server architecture", "Debugging"] },
 ];
 
+const getAnchors = () => {
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const tops = SECTIONS.map((s) => document.getElementById(s.id)?.offsetTop ?? 0);
+    const anchors = tops.map((t, i) => (i === 0 ? 0 : Math.min(t, maxScroll)));
+    const k = tops.findIndex((t, i) => i > 0 && t >= maxScroll - 1);
+    if (k > 0) {
+        const start = anchors[k - 1];
+        const span = Math.max(maxScroll - start, 1);
+        const n = anchors.length - k;
+        for (let j = k; j < anchors.length; j++) anchors[j] = start + (span * (j - k + 1)) / n;
+    }
+    return anchors;
+};
+
 export const Home = ({ projects }: { projects: ProjectSummary[] }) => {
     const [active, setActive] = useState(0);
+    const trailRef = useRef<HTMLElement>(null);
+    const markerRef = useRef<HTMLSpanElement>(null);
+
+    const goTo = (e: React.MouseEvent, i: number) => {
+        e.preventDefault();
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        window.scrollTo({ top: getAnchors()[i], behavior: reduce ? "auto" : "smooth" });
+        window.history.replaceState(null, "", `#${SECTIONS[i].id}`);
+    };
 
     useEffect(() => {
         let frame = 0;
+        let lastY = window.scrollY;
+        let idle = 0;
         const spy = () => {
             frame = 0;
-            const y = window.scrollY + window.innerHeight * 0.4;
+            const sy = window.scrollY;
+            const anchors = getAnchors();
             let cur = 0;
-            SECTIONS.forEach((s, i) => {
-                const el = document.getElementById(s.id);
-                if (el && el.offsetTop <= y) cur = i;
-            });
-            setActive(cur);
+            anchors.forEach((a, i) => { if (a <= sy) cur = i; });
+            let pos = cur;
+            if (cur < anchors.length - 1 && anchors[cur + 1] > anchors[cur]) pos = cur + (sy - anchors[cur]) / (anchors[cur + 1] - anchors[cur]);
+            setActive(Math.round(pos));
+
+            const trail = trailRef.current;
+            const marker = markerRef.current;
+            if (!trail || !marker) return;
+            const base = trail.getBoundingClientRect().top;
+            const ys = Array.from(trail.querySelectorAll("i")).map((el) => el.getBoundingClientRect().top - base);
+            const i = Math.min(Math.floor(pos), ys.length - 1);
+            const at = ys[i] + (i + 1 < ys.length ? (ys[i + 1] - ys[i]) * (pos - i) : 0);
+            marker.style.transform = `translateY(${at}px)`;
+
+            if (sy !== lastY) {
+                trail.classList.add("moving");
+                trail.classList.toggle("up", sy < lastY);
+                lastY = sy;
+                window.clearTimeout(idle);
+                idle = window.setTimeout(() => trail.classList.remove("moving"), 220);
+            }
         };
         const onScroll = () => { if (!frame) frame = requestAnimationFrame(spy); };
         spy();
         window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll);
 
         const io = new IntersectionObserver(
             (entries) => entries.forEach((e) => {
@@ -81,14 +124,15 @@ export const Home = ({ projects }: { projects: ProjectSummary[] }) => {
         );
         document.querySelectorAll(".e-reveal").forEach((el) => io.observe(el));
 
-        return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(frame); io.disconnect(); };
+        return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(frame); window.clearTimeout(idle); io.disconnect(); };
     }, []);
 
     return (
         <>
-            <nav className="e-trail" aria-label="Sections">
+            <nav className="e-trail" aria-label="Sections" ref={trailRef}>
+                <span className="e-marker" ref={markerRef} aria-hidden="true" />
                 {SECTIONS.map((s, i) => (
-                    <a key={s.id} href={`#${s.id}`} className={i === active ? "on" : ""}><i />{s.label}</a>
+                    <a key={s.id} href={`#${s.id}`} className={`${i === active ? "on " : ""}${i <= active ? "pass" : ""}`} onClick={(e) => goTo(e, i)}><i />{s.label}</a>
                 ))}
             </nav>
 
