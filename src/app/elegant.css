@@ -11,7 +11,7 @@ html{scroll-behavior:smooth}
 .e-veil{position:fixed;z-index:100;display:none;border-radius:50%;background:var(--e-gold);pointer-events:none;will-change:transform;transform:translate(-50%,-50%) scale(0)}
 html.e-nav{scroll-behavior:auto!important}
 html.e-nav .e-constel .sat{animation-play-state:paused}
-.e-page{animation:e-in .45s cubic-bezier(.2,.8,.2,1) both}
+.e-page{animation:e-in .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes e-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.e-page{animation:none}.e-reveal{opacity:1!important;transform:none!important}}
 
